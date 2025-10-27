@@ -10,7 +10,7 @@ import SuccessHeroSlider from "@/components/SuccessHeroSlider";
 import { useSearchParams, useRouter } from "next/navigation";
 import ScanOverlayPurchase from "@/components/ScanOverlayPurchase";
 
-const SIGNUP_URL = "https://ai.emoneydeals.com";
+const SIGNUP_URL = "https://reserve.emoneydeals.com";
 
 type ApiResp = { items: any[]; count: number };
 
@@ -97,7 +97,7 @@ export default function Dashboard() {
 
     function openPurchaseOverlay() {
         setScanning(false);
-        setOpen(true);
+        finalizeRoute();
     }
 
     if (!isUSZip(zip) || !initialZip || !initialZip?.length) {
