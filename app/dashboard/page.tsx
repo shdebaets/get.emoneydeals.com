@@ -97,7 +97,7 @@ export default function Dashboard() {
 
     function openPurchaseOverlay() {
         setScanning(false);
-        finalizeRoute();
+        setOpen(true);
     }
 
     if (!isUSZip(zip) || !initialZip || !initialZip?.length) {
