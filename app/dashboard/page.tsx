@@ -9,6 +9,7 @@ import SkeletonCard from "@/components/SkeletonCard";
 import { gaEvent } from "@/app/(lib)/ga";
 import SuccessHeroSlider from "@/components/SuccessHeroSlider";
 import { useSearchParams, useRouter } from "next/navigation";
+
 import ScanOverlayPurchase from "@/components/ScanOverlayPurchase";
 import { WhopCheckoutEmbed, useCheckoutEmbedControls } from "@whop/checkout/react";
 
@@ -186,11 +187,13 @@ export default function Dashboard() {
 
           {/* Whop checkout/embed for FREE ACCESS PASS */}
           <div className="mx-auto mt-5 w-full max-w-md">
+            
             <WhopCheckoutEmbed
               ref={whopRef}
               planId="plan_1VcEs4q7JdTP3"
               theme="dark"
-              onComplete={(planId, receiptId) => {
+              skipRedirect
+              onComplete={(planId, receiptId, url) => {
                 gaEvent("whop_embed_event", {
                   name: "complete",
                   planId,
@@ -198,6 +201,12 @@ export default function Dashboard() {
                   zip,
                   src: "dashboard_modal",
                 });
+            
+                // Optional: close modal first
+                setOpen(false);
+            
+                // ✅ Redirect to external URL
+                window.location.href = "https://reserve.emoneydeals.com";
               }}
               fallback={
                 <div className="card border border-white/10 p-4 text-sm text-white/70">
