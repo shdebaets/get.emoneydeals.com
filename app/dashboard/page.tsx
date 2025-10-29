@@ -103,35 +103,31 @@ export default function Dashboard() {
   async function submitEmail(e: React.FormEvent) {
     e.preventDefault();
     setErr(null);
-
+  
+    // still validate so the field isn't pointless
     if (!isValidEmail(email)) {
       setErr("Please enter a valid email.");
       return;
     }
-
+  
     try {
       setSubmitting(true);
-      const r = await fetch("/api/lead", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: email.trim(),
-          zip,
-          source: "dashboard_modal",
-        }),
-      });
-
-      if (!r.ok) throw new Error("Could not save your email. Please try again.");
-
-      gaEvent("lead_captured", {
+  
+      // optional analytics — no server save
+      gaEvent("lead_skipped_save", {
         email_domain: email.split("@")[1],
         zip,
         src: "dashboard_modal",
       });
-
-      window.location.href = "https://reserve.emoneydeals.com";
+  
+      // pass email & zip along as query params if you want to prefill the next page
+      const next = new URL("https://reserve.emoneydeals.com");
+      next.searchParams.set("email", email.trim());
+      if (zip) next.searchParams.set("zip", String(zip));
+  
+      window.location.href = next.toString();
     } catch (e: any) {
-      setErr(e?.message || "Something went wrong.");
+      setErr("Something went wrong.");
     } finally {
       setSubmitting(false);
     }
