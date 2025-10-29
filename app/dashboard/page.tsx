@@ -7,8 +7,10 @@ import ItemCard from "@/components/ItemCard";
 import Modal from "@/components/Modal";
 import SkeletonCard from "@/components/SkeletonCard";
 import { gaEvent } from "@/app/(lib)/ga";
+import SuccessHeroSlider from "@/components/SuccessHeroSlider";
 import { useSearchParams, useRouter } from "next/navigation";
 import ScanOverlayPurchase from "@/components/ScanOverlayPurchase";
+import { WhopCheckoutEmbed, useCheckoutEmbedControls } from "@whop/checkout/react";
 
 type ApiResp = { items: any[]; count: number };
 
@@ -33,9 +35,8 @@ type FomoProps = {
   label?: string;
 };
 
-function isValidEmail(v: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
-}
+// ⬇️ Replace with your FREE access pass *plan* ID on Whop
+const FREE_PASS_PLAN_ID = "plan_yourFreeAccessPassIdHere";
 
 export default function Dashboard() {
   const searchParams = useSearchParams();
@@ -48,10 +49,8 @@ export default function Dashboard() {
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [scanning, setScanning] = useState(false);
 
-  // email capture state (moved inside component so `zip` is in scope)
-  const [email, setEmail] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
+  // Whop embed controls (so you can interact/track if needed)
+  const whopRef = useCheckoutEmbedControls();
 
   useEffect(() => {
     const next = cleanUSZip(initialZip || "");
@@ -98,39 +97,6 @@ export default function Dashboard() {
     setScanning(false);
     setOpen(true);
     gaEvent("modal_open", { src: "dashboard_modal", zip });
-  }
-
-  async function submitEmail(e: React.FormEvent) {
-    e.preventDefault();
-    setErr(null);
-  
-    // still validate so the field isn't pointless
-    if (!isValidEmail(email)) {
-      setErr("Please enter a valid email.");
-      return;
-    }
-  
-    try {
-      setSubmitting(true);
-  
-      // optional analytics — no server save
-      gaEvent("lead_skipped_save", {
-        email_domain: email.split("@")[1],
-        zip,
-        src: "dashboard_modal",
-      });
-  
-      // pass email & zip along as query params if you want to prefill the next page
-      const next = new URL("https://reserve.emoneydeals.com");
-      next.searchParams.set("email", email.trim());
-      if (zip) next.searchParams.set("zip", String(zip));
-  
-      window.location.href = next.toString();
-    } catch (e: any) {
-      setErr("Something went wrong.");
-    } finally {
-      setSubmitting(false);
-    }
   }
 
   if (!isUSZip(zip) || !initialZip || !initialZip?.length) {
@@ -205,7 +171,7 @@ export default function Dashboard() {
         )}
       </AnimatePresence>
 
-      {/* MODAL: “Your Report is Ready” */}
+      {/* MODAL: “Your Report is Ready” with WHOP EMBED for Free Access Pass */}
       <Modal open={open} onClose={() => setOpen(false)}>
         <div className="items-center justify-center text-center">
           <h3 className="text-xl font-bold">Your Report is Ready ✅</h3>
@@ -213,43 +179,43 @@ export default function Dashboard() {
             Enter your email below to claim your report and <strong>unlock full access to this software</strong>.
           </p>
 
+          {/* Optional trust line */}
           <div className="mt-2 text-[11px] text-white/55">
             You’ll receive your local report and free instant access on the next page.
           </div>
 
+          {/* Whop checkout/embed for FREE ACCESS PASS */}
           <div className="mx-auto mt-5 w-full max-w-md">
-            <form onSubmit={submitEmail} className="mx-auto mt-5 w-full max-w-md">
-              <label className="mb-2 block text-left text-sm text-white/80">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="johnappleseed@gmail.com"
-                className="w-full rounded-lg bg-white/10 px-4 py-3 text-white placeholder-white/40 outline-none ring-1 ring-white/10 focus:ring-2 focus:ring-fuchsia-400"
-                required
-                autoComplete="email"
-                inputMode="email"
-              />
+            <WhopCheckoutEmbed
+              ref={whopRef}
+              planId="plan_1VcEs4q7JdTP3"
+              theme="dark"
+              onComplete={(planId, receiptId) => {
+                gaEvent("whop_embed_event", {
+                  name: "complete",
+                  planId,
+                  receiptId,
+                  zip,
+                  src: "dashboard_modal",
+                });
+              }}
+              fallback={
+                <div className="card border border-white/10 p-4 text-sm text-white/70">
+                  Loading…
+                </div>
+              }
+            />
 
-              {err ? <p className="mt-2 text-sm text-red-400">{err}</p> : null}
-
-              <button
-                type="submit"
-                disabled={submitting}
-                className="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-indigo-500 px-4 py-3 font-semibold text-white hover:bg-indigo-400 disabled:opacity-60"
-              >
-                {submitting ? "Submitting…" : "Join"}
-              </button>
-
-              <p className="mt-2 text-center text-xs text-white/55">
-                You’ll receive your local report and instant access on the next page.
-              </p>
-            </form>
           </div>
+
+          {/* Proof / benefits carousel stays */}
+          
 
           <div className="mt-3 flex items-center justify-center">
             <FomoBadge min={200} max={450} durationMs={15 * 60_000} />
           </div>
+
+          
         </div>
       </Modal>
 
