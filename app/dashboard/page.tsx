@@ -10,6 +10,7 @@ import { gaEvent } from "@/app/(lib)/ga";
 import SuccessHeroSlider from "@/components/SuccessHeroSlider";
 import { useSearchParams, useRouter } from "next/navigation";
 import ScanOverlayPurchase from "@/components/ScanOverlayPurchase";
+import { WhopCheckoutEmbed, useCheckoutEmbedControls } from "@whop/checkout/react";
 
 type ApiResp = { items: any[]; count: number };
 
@@ -34,10 +35,8 @@ type FomoProps = {
   label?: string;
 };
 
-// 🔗 Replace with your hosted Whop checkout URL for the FREE ACCESS PASS
-// Example pattern (placeholder): https://whop.com/checkout/plan_xxx?embed=1
-// If Whop supports prefill, you can add &email= and &zip= below.
-const WHOP_FREE_PASS_URL = "https://whop.com/checkout/plan_1VcEs4q7JdTP3?embed=1";
+// ⬇️ Replace with your FREE access pass *plan* ID on Whop
+const FREE_PASS_PLAN_ID = "plan_yourFreeAccessPassIdHere";
 
 export default function Dashboard() {
   const searchParams = useSearchParams();
@@ -49,6 +48,9 @@ export default function Dashboard() {
   const [zipData, setZipData] = useState<ZipData | null>(null);
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [scanning, setScanning] = useState(false);
+
+  // Whop embed controls (so you can interact/track if needed)
+  const whopRef = useCheckoutEmbedControls();
 
   useEffect(() => {
     const next = cleanUSZip(initialZip || "");
@@ -65,7 +67,9 @@ export default function Dashboard() {
     setLoading(true);
     setData(null);
     try {
-      const res = await fetch(`/api/items?zip=${encodeURIComponent(z)}`, { cache: "no-store" });
+      const res = await fetch(`/api/items?zip=${encodeURIComponent(z)}`, {
+        cache: "no-store",
+      });
       const json = (await res.json()) as ApiResp;
       setData(json);
 
@@ -100,15 +104,11 @@ export default function Dashboard() {
     return null;
   }
 
-  // Build iframe URL with optional context (safe to include)
-  const iframeSrc = `${WHOP_FREE_PASS_URL}${
-    WHOP_FREE_PASS_URL.includes("?") ? "&" : "?"
-  }src=dashboard_modal&zip=${encodeURIComponent(zip)}`;
-
   return (
     <div className="relative min-h-dvh pb-20">
       <section className="container py-6">
         <h1 className="text-2xl font-bold">eMoney Deals</h1>
+
         {data?.count ? (
           <div className="mt-4 card p-4">
             <div className="text-sm">
@@ -171,32 +171,39 @@ export default function Dashboard() {
         )}
       </AnimatePresence>
 
-      {/* MODAL: “Your Report is Ready” with Whop hosted checkout iframe */}
+      {/* MODAL: “Your Report is Ready” with WHOP EMBED for Free Access Pass */}
       <Modal open={open} onClose={() => setOpen(false)}>
         <div className="items-center justify-center text-center">
           <h3 className="text-xl font-bold">Your Report is Ready</h3>
           <p className="text-sm text-white/70 mt-1">
             Enter your email below to claim your report and unlock your free trial.
           </p>
+
+          {/* Optional trust line */}
           <div className="mt-2 text-[11px] text-white/55">
             You’ll receive your local report and instant access on the next step.
           </div>
 
-          {/* Hosted Whop Checkout */}
-          <div className="mx-auto mt-5 w-full max-w-md rounded-xl overflow-hidden border border-white/10 bg-[color:var(--card)]">
-            <iframe
-              src={iframeSrc}
-              title="Whop Free Pass"
-              className="w-full"
-              style={{ height: 560, border: "0" }}
-              allow="payment *; clipboard-write; accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-              sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-              onLoad={() =>
-                gaEvent("whop_iframe_loaded", { src: "dashboard_modal", zip })
-              }
+          {/* Whop checkout/embed for FREE ACCESS PASS */}
+          <div className="mx-auto mt-5 w-full max-w-md">
+            <WhopCheckoutEmbed
+              ref={whopRef}
+              planId={FREE_PASS_PLAN_ID}
+              theme="dark"
+              // Sends useful tracking data
+              onEvent={(e) => {
+                gaEvent("whop_embed_event", {
+                  name: e?.name || "unknown",
+                  zip,
+                  src: "dashboard_modal",
+                });
+              }}
+              // Show a simple skeleton while loading
+              fallback={<div className="card border border-white/10 p-4 text-sm text-white/70">Loading…</div>}
             />
           </div>
 
+          {/* Proof / benefits carousel stays */}
           <SuccessHeroSlider
             items={[
               { src: "/success/insaneclearance.jpg", caption: "UNLOCK EXCLUSIVE HIDDEN CLEARANCE DEALS" },
@@ -214,6 +221,7 @@ export default function Dashboard() {
             <FomoBadge min={200} max={450} durationMs={15 * 60_000} />
           </div>
 
+          {/* Free Trial badge */}
           <div className="absolute top-0 right-0 w-16 h-16 rounded-full bg-red-600 flex items-center justify-center text-white font-bold text-sm -translate-x-1/3 -translate-y-1/3 shadow-glow">
             <span className="text-center">FREE TRIAL</span>
           </div>
@@ -221,11 +229,7 @@ export default function Dashboard() {
       </Modal>
 
       {scanning && (
-        <ScanOverlayPurchase
-          item={selectedItem}
-          cities={zipData?.cities || []}
-          onDone={openPurchaseOverlay}
-        />
+        <ScanOverlayPurchase item={selectedItem} cities={zipData?.cities || []} onDone={openPurchaseOverlay} />
       )}
     </div>
   );
