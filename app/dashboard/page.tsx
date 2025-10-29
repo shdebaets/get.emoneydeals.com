@@ -188,7 +188,7 @@ export default function Dashboard() {
           <div className="mx-auto mt-5 w-full max-w-md">
             <WhopCheckoutEmbed
               ref={whopRef}
-              planId={FREE_PASS_PLAN_ID}
+              planId="plan_1VcEs4q7JdTP3"
               theme="dark"
               // Sends useful tracking data
               onEvent={(e) => {
