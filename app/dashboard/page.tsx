@@ -183,16 +183,12 @@ export default function Dashboard() {
           <div className="mt-2 text-[11px] text-white/55">
             Completely free today. Card required to prevent bot entries.
           </div>
-
-          {/* Whop checkout/embed for FREE ACCESS PASS */}
-          <div className="mx-auto mt-5 w-full max-w-md">
-            <div
-              className="transform scale-[0.85] origin-top w-[320px] max-w-[90vw]"
-              style={{
-                transformOrigin: "top center",
-              }}
-            >
-              <WhopCheckoutEmbed
+          {/* Whop checkout/embed for FREE ACCESS PASS (small + scrollable) */}
+          <div className="mx-auto mt-5 w-full max-w-[360px]">
+            {/* The scroll frame */}
+            <div className="max-h-[72vh] overflow-y-auto rounded-xl border border-white/10 bg-black/40 p-3">
+              <div className="w-[320px] max-w-full">
+                <WhopCheckoutEmbed
                 ref={whopRef}
                 planId="plan_BlCzidG0ZQ185"
                 theme="dark"
@@ -203,10 +199,16 @@ export default function Dashboard() {
                   setOpen(false);
                   window.location.href = "https://welcome.emoneydeals.com";
                 }}
-                fallback={<div className="card border border-white/10 p-4 text-sm text-white/70">Loading…</div>}
-              />
+                  fallback={
+                    <div className="card border border-white/10 p-4 text-sm text-white/70">
+                      Loading…
+                    </div>
+                  }
+                />
+              </div>
             </div>
           </div>
+         
 
           {/* Proof / benefits carousel stays */}
           
