@@ -190,20 +190,13 @@ export default function Dashboard() {
               ref={whopRef}
               planId="plan_1VcEs4q7JdTP3"
               theme="dark"
-              onComplete={(planId, receiptId) => {
-                gaEvent("whop_embed_event", {
-                  name: "complete",
-                  planId,
-                  receiptId,
-                  zip,
-                  src: "dashboard_modal",
-                });
+              skipRedirect
+              onComplete={(_planId, _receiptId) => {
+                // Primary path
+                setOpen(false);
+                window.location.href = "https://reserve.emoneydeals.com";
               }}
-              fallback={
-                <div className="card border border-white/10 p-4 text-sm text-white/70">
-                  Loading…
-                </div>
-              }
+              fallback={<div className="card border border-white/10 p-4 text-sm text-white/70">Loading…</div>}
             />
 
           </div>
