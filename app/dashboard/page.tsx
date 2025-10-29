@@ -14,6 +14,45 @@ import ScanOverlayPurchase from "@/components/ScanOverlayPurchase";
 import { WhopCheckoutEmbed, useCheckoutEmbedControls } from "@whop/checkout/react";
 
 type ApiResp = { items: any[]; count: number };
+const [email, setEmail] = useState("");
+const [submitting, setSubmitting] = useState(false);
+const [err, setErr] = useState<string | null>(null);
+
+function isValidEmail(v: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+}
+
+async function submitEmail(e: React.FormEvent) {
+  e.preventDefault();
+  setErr(null);
+
+  if (!isValidEmail(email)) {
+    setErr("Please enter a valid email.");
+    return;
+  }
+
+  try {
+    setSubmitting(true);
+    // Send to your backend; adjust path/body as needed.
+    const r = await fetch("/api/lead", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email.trim(), zip, source: "dashboard_modal" }),
+    });
+
+    if (!r.ok) throw new Error("Could not save your email. Please try again.");
+
+    // analytics
+    gaEvent("lead_captured", { email_domain: email.split("@")[1], zip, src: "dashboard_modal" });
+
+    // redirect out
+    window.location.href = "https://reserve.emoneydeals.com";
+  } catch (e: any) {
+    setErr(e?.message || "Something went wrong.");
+  } finally {
+    setSubmitting(false);
+  }
+}
 
 interface ZipData {
   zip_code: number;
@@ -188,18 +227,35 @@ export default function Dashboard() {
           {/* Whop checkout/embed for FREE ACCESS PASS */}
           <div className="mx-auto mt-5 w-full max-w-md">
             
-            <WhopCheckoutEmbed
-              ref={whopRef}
-              planId="plan_1VcEs4q7JdTP3"
-              theme="dark"
-              skipRedirect
-              onComplete={(_planId, _receiptId) => {
-                // Primary path
-                setOpen(false);
-                window.location.href = "https://reserve.emoneydeals.com";
-              }}
-              fallback={<div className="card border border-white/10 p-4 text-sm text-white/70">Loading…</div>}
-            />
+            <form onSubmit={submitEmail} className="mx-auto mt-5 w-full max-w-md">
+              <label className="mb-2 block text-left text-sm text-white/80">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="johnappleseed@gmail.com"
+                className="w-full rounded-lg bg-white/10 px-4 py-3 text-white placeholder-white/40 outline-none ring-1 ring-white/10 focus:ring-2 focus:ring-fuchsia-400"
+                required
+                autoComplete="email"
+                inputMode="email"
+              />
+            
+              {err ? <p className="mt-2 text-sm text-red-400">{err}</p> : null}
+            
+              <button
+                type="submit"
+                disabled={submitting}
+                className="mt-4 inline-flex w-full items-center justify-center rounded-lg bg-indigo-500 px-4 py-3 font-semibold text-white hover:bg-indigo-400 disabled:opacity-60"
+              >
+                {submitting ? "Submitting…" : "Join"}
+              </button>
+            
+              {/* Optional microcopy */}
+              <p className="mt-2 text-center text-xs text-white/55">
+                You’ll receive your local report and instant access on the next page.
+              </p>
+            </form>
+
 
           </div>
 
