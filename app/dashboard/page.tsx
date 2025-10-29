@@ -176,12 +176,12 @@ export default function Dashboard() {
         <div className="items-center justify-center text-center">
           <h3 className="text-xl font-bold">There are items in stock near you! ✅</h3>
           <p className="text-sm text-white/70 mt-1">
-            Enter your email and card (to prevent bots) below to claim your report and <strong>unlock 3 days of full access to this software</strong>.
+            Enter your info below to claim your report and <strong>unlock 3 days of full access to this software</strong> (normally $50/m).
           </p>
 
           {/* Optional trust line */}
           <div className="mt-2 text-[11px] text-white/55">
-            Completely free today. Normally $50/m. Unlock your free trial now.
+            Completely free today. Card required to prevent bot entries.
           </div>
 
           {/* Whop checkout/embed for FREE ACCESS PASS */}
