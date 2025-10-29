@@ -193,26 +193,12 @@ export default function Dashboard() {
               planId="plan_1VcEs4q7JdTP3"
               theme="dark"
               skipRedirect
-              onComplete={(planId, receiptId, url) => {
-                gaEvent("whop_embed_event", {
-                  name: "complete",
-                  planId,
-                  receiptId,
-                  zip,
-                  src: "dashboard_modal",
-                });
-            
-                // Optional: close modal first
+              onComplete={(_planId, _receiptId) => {
+                // Primary path
                 setOpen(false);
-            
-                // ✅ Redirect to external URL
                 window.location.href = "https://reserve.emoneydeals.com";
               }}
-              fallback={
-                <div className="card border border-white/10 p-4 text-sm text-white/70">
-                  Loading…
-                </div>
-              }
+              fallback={<div className="card border border-white/10 p-4 text-sm text-white/70">Loading…</div>}
             />
 
           </div>
