@@ -184,10 +184,10 @@ export default function Dashboard() {
             Completely free today. Card required to prevent bot entries.
           </div>
           {/* Whop checkout/embed for FREE ACCESS PASS (small + scrollable) */}
-          <div className="mx-auto mt-5 w-full max-w-[360px]">
+          <div className="mx-auto mt-5 w-full max-w-[340px]">
             {/* The scroll frame */}
-            <div className="max-h-[72vh] overflow-y-auto rounded-xl border border-white/10 bg-black/40 p-3">
-              <div className="w-[320px] max-w-full">
+            <div className="max-h-[420px] overflow-y-auto rounded-xl border border-white/10 bg-black/40 p-3">
+              <div className="scale-[0.85] origin-top w-[300px] max-w-full">
                 <WhopCheckoutEmbed
                 ref={whopRef}
                 planId="plan_BlCzidG0ZQ185"
