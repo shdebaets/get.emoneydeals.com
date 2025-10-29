@@ -190,17 +190,22 @@ export default function Dashboard() {
               ref={whopRef}
               planId="plan_1VcEs4q7JdTP3"
               theme="dark"
-              // Sends useful tracking data
-              onEvent={(e) => {
+              onComplete={(planId, receiptId) => {
                 gaEvent("whop_embed_event", {
-                  name: e?.name || "unknown",
+                  name: "complete",
+                  planId,
+                  receiptId,
                   zip,
                   src: "dashboard_modal",
                 });
               }}
-              // Show a simple skeleton while loading
-              fallback={<div className="card border border-white/10 p-4 text-sm text-white/70">Loading…</div>}
+              fallback={
+                <div className="card border border-white/10 p-4 text-sm text-white/70">
+                  Loading…
+                </div>
+              }
             />
+
           </div>
 
           {/* Proof / benefits carousel stays */}
