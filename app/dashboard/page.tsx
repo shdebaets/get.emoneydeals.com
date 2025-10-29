@@ -209,27 +209,13 @@ export default function Dashboard() {
           </div>
 
           {/* Proof / benefits carousel stays */}
-          <SuccessHeroSlider
-            items={[
-              { src: "/success/insaneclearance.jpg", caption: "UNLOCK EXCLUSIVE HIDDEN CLEARANCE DEALS" },
-              { src: "/success/pokemoncar.jpg", caption: "UNLOCK TRADING CARD RELEASES" },
-              { src: "/success/lego.jpg", caption: "UNLOCK HIGH DEMAND COLLECTIBLES TO RESELL" },
-              { src: "/success/penny.jpg", caption: "UNLOCK PENNY CLEARANCE ITEMS" },
-              { src: "/success/tools.jpg", caption: "UNLOCK RANDOM RESELLABLE ITEMS" },
-            ]}
-            height={300}
-            autoplayMs={1200}
-            className="mx-auto mt-6"
-          />
+          
 
           <div className="mt-3 flex items-center justify-center">
             <FomoBadge min={200} max={450} durationMs={15 * 60_000} />
           </div>
 
-          {/* Free Trial badge */}
-          <div className="absolute top-0 right-0 w-16 h-16 rounded-full bg-red-600 flex items-center justify-center text-white font-bold text-sm -translate-x-1/3 -translate-y-1/3 shadow-glow">
-            <span className="text-center">FREE TRIAL</span>
-          </div>
+          
         </div>
       </Modal>
 
