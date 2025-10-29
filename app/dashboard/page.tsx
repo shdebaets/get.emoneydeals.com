@@ -174,14 +174,14 @@ export default function Dashboard() {
       {/* MODAL: “Your Report is Ready” with WHOP EMBED for Free Access Pass */}
       <Modal open={open} onClose={() => setOpen(false)}>
         <div className="items-center justify-center text-center">
-          <h3 className="text-xl font-bold">Your Report is Ready ✅</h3>
+          <h3 className="text-xl font-bold">There are items in stock near you! ✅</h3>
           <p className="text-sm text-white/70 mt-1">
-            Enter your email below to claim your report and <strong>unlock full access to this software</strong>.
+            Enter your email and card (to prevent bots) below to claim your report and <strong>unlock 3 days of full access to this software</strong>.
           </p>
 
           {/* Optional trust line */}
           <div className="mt-2 text-[11px] text-white/55">
-            You’ll receive your local report and free instant access on the next page.
+            Completely free today. Normally $50/m. Unlock your free trial now.
           </div>
 
           {/* Whop checkout/embed for FREE ACCESS PASS */}
