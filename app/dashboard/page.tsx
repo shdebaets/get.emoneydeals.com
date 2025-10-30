@@ -217,12 +217,11 @@ export default function Dashboard() {
         </div>
 
         {/* CTA */}
-        <div className="flex items-center justify-center">
-          <div className="relative mt-4 w-full max-w-[360px]">
-            <p className="mt-4 text-sm text-white/80 text-center">👇Unlock the stores near you with this deal👇</p>
-
+     
+        <div className="flex items-center justify-center mt-2">
+          <div className="relative w-full max-w-[360px]">
             <div className="flex items-center justify-center">
-              <div className="relative mt-3 w-full max-w-[360px]">
+              <div className="relative mt-2 w-full max-w-[360px]">
                 {/* outer glow */}
                 <div
                   className="pointer-events-none absolute -inset-1 rounded-2xl bg-gradient-to-r from-fuchsia-500/40 via-purple-500/40 to-pink-500/40 blur-lg opacity-70"
@@ -236,7 +235,7 @@ export default function Dashboard() {
                   transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
                 />
                 <motion.button
-                  className="relative btn btn-primary w-full rounded-2xl py-4 cursor-pointer hover:opacity-90"
+                  className="relative btn btn-primary w-full rounded-2xl py-4 cursor-pointer hover:opacity-90 flex flex-col items-center justify-center"
                   onClick={finalizeRoute}
                   initial={{ opacity: 0, scale: 0.98 }}
                   animate={{
@@ -252,7 +251,8 @@ export default function Dashboard() {
                   whileTap={{ scale: 0.99 }}
                   transition={{ duration: 0.4, boxShadow: { duration: 2, repeat: Infinity, ease: "easeInOut" } }}
                 >
-                  🚨 Claim Now 🚨
+                  <span className="text-lg font-semibold">👑 Claim Now 👑</span>
+                  <span className="text-xs text-white/80 mt-1">Unlock the stores near you with this deal 👇</span>
                 </motion.button>
               </div>
             </div>
