@@ -190,14 +190,14 @@ export default function Dashboard() {
               <div className="scale-[0.85] origin-top w-[300px] max-w-full">
                 <WhopCheckoutEmbed
                 ref={whopRef}
-                planId="plan_BlCzidG0ZQ185"
+                planId="plan_1VcEs4q7JdTP3"
                 theme="dark"
                 skipRedirect
                 hidePrice={true}
                 onComplete={(_planId, _receiptId) => {
                   // Primary path
                   setOpen(false);
-                  window.location.href = "https://welcome.emoneydeals.com";
+                  window.location.href = "https://reserve.emoneydeals.com";
                 }}
                   fallback={
                     <div className="card border border-white/10 p-4 text-sm text-white/70">
