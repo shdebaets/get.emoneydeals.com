@@ -218,7 +218,7 @@ export default function Dashboard() {
               </motion.button>
 
               <p className="mt-2 text-xs text-white/60">
-                By starting demo, you agree to receive onboarding tips. You can opt out anytime.
+                A private invite to our 100% free telegram deal group will be emailed to you
               </p>
             </form>
           </motion.div>
