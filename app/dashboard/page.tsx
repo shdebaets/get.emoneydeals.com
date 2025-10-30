@@ -10,7 +10,7 @@ import SuccessHeroSlider from "@/components/SuccessHeroSlider";
 import { useSearchParams, useRouter } from "next/navigation";
 import ScanOverlayPurchase from "@/components/ScanOverlayPurchase";
 
-const SIGNUP_URL = "https://ai.emoneydeals.com";
+const SIGNUP_URL = "https://reserve.emoneydeals.com";
 
 type ApiResp = { items: any[]; count: number };
 
@@ -183,7 +183,7 @@ export default function Dashboard() {
 
             <Modal open={open} onClose={() => setOpen(false)}>
                 <div className="items-center justify-center text-center">
-                    <h3 className="text-xl font-bold">Your Hidden Deal is In Stock Near You ✅</h3>
+                    <h3 className="text-xl font-bold">This Deal is in Stock Near You ✅</h3>
                     <p className="text-sm text-white/70 mt-1">
                         Unlock Access to The Clearance Software Everyone’s Using
                     </p>
@@ -191,7 +191,7 @@ export default function Dashboard() {
                 
                     <div className="mt-6">
                         <div className="inline-flex items-center justify-center rounded-xl px-4 py-2 font-semibold transition bg-[color:var(--card)] border border-white/10" onClick={finalizeRoute}>
-                            <div className="w-[10px] h-[10px] rounded-full bg-green-400 animate-pulse"></div> &nbsp; Our members grabbed these exact items for 90% off last week 👇
+                            <div className="w-[10px] h-[10px] rounded-full bg-green-400 animate-pulse"></div> &nbsp; Recent Member Wins👇
                         </div>
 
                     </div>
@@ -216,13 +216,47 @@ export default function Dashboard() {
                 </div>
 
                 <div className="mt-3 flex items-center justify-center">
+                  <motion.div
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
+                  >
                     <FomoBadge min={200} max={450} durationMs={15 * 60_000} />
+                  </motion.div>
                 </div>
 
+                {/* CTA */}
                 <div className="flex items-center justify-center">
-                    <button className="btn btn-primary mt-4 py-4! cursor-pointer hover:opacity-80 transition-all duration-200" onClick={finalizeRoute}>
-                        Claim Now 🔓
-                    </button>
+                  <div className="relative mt-4 w-full max-w-[360px]">
+                    {/* glow layer */}
+                    <p className="mt-4 text-sm text-white/80 text-center">
+                      Unlock the stores near you with this deal 🔓
+                    </p>
+                    
+                    <div className="flex items-center justify-center">
+                      <div className="relative mt-3 w-full max-w-[360px]">
+                        <div
+                          className="pointer-events-none absolute -inset-1 rounded-2xl bg-gradient-to-r from-fuchsia-500/40 via-purple-500/40 to-pink-500/40 blur-lg opacity-70"
+                          aria-hidden
+                        />
+                        <motion.button
+                          className="relative btn btn-primary w-full py-4! cursor-pointer hover:opacity-90 rounded-2xl"
+                          onClick={finalizeRoute}
+                          whileHover={{ scale: 1.03 }}
+                          whileTap={{ scale: 0.99 }}
+                          animate={{
+                            boxShadow: [
+                              "0 0 0px rgba(168,85,247,0.45)",
+                              "0 0 28px rgba(168,85,247,0.75)",
+                              "0 0 0px rgba(168,85,247,0.45)",
+                            ],
+                          }}
+                          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                        >
+                          Claim Now 🔓
+                        </motion.button>
+                      </div>
+                    </div>
                 </div>
 
                 <div className="absolute top-0 right-0 w-16 h-16 rounded-full bg-red-600 flex items-center justify-center text-white font-bold text-sm -translate-x-1/3 -translate-y-1/3 shadow-glow">
@@ -241,7 +275,7 @@ function FomoBadge({
     durationMs = 15 * 60_000,
     autoReset = false,
     onExpire,
-    label = "claimed in the last hour",
+    label = "new users unlocked their stores in the last hour",
 }: FomoProps) {
     const randInt = (a: number, b: number) => a + Math.floor(Math.random() * (b - a + 1));
     const [count] = useState(() => randInt(min, max));
