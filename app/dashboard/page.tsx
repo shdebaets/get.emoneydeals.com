@@ -15,323 +15,322 @@ const SIGNUP_URL = "https://reserve.emoneydeals.com";
 type ApiResp = { items: any[]; count: number };
 
 interface ZipData {
-    zip_code: number;
-    city: string;
-    state: string;
-    county: string;
-    latitude: number;
-    longitude: number;
-    cities: string[];
-    uniqueCities: string[];
-    addresses: string[];
+  zip_code: number;
+  city: string;
+  state: string;
+  county: string;
+  latitude: number;
+  longitude: number;
+  cities: string[];
+  uniqueCities: string[];
+  addresses: string[];
 }
 
 type FomoProps = {
-    min?: number;
-    max?: number;
-    durationMs?: number;
-    autoReset?: boolean;
-    onExpire?: () => void;
-    label?: string;
+  min?: number;
+  max?: number;
+  durationMs?: number;
+  autoReset?: boolean;
+  onExpire?: () => void;
+  label?: string;
 };
 
 export default function Dashboard() {
-    const searchParams = useSearchParams();
-    const initialZip = searchParams.get("zip");
-    const [zip, setZip] = useState(cleanUSZip(initialZip || ""));
-    const [data, setData] = useState<ApiResp | null>(null);
-    const [loading, setLoading] = useState(false);
-    const [open, setOpen] = useState(false);
-    const [zipData, setZipData] = useState<ZipData | null>(null);
-    const [selectedItem, setSelectedItem] = useState<any | null>(null);
-    const [scanning, setScanning] = useState(false);
+  const searchParams = useSearchParams();
+  const initialZip = searchParams.get("zip");
+  const [zip, setZip] = useState(cleanUSZip(initialZip || ""));
+  const [data, setData] = useState<ApiResp | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [zipData, setZipData] = useState<ZipData | null>(null);
+  const [selectedItem, setSelectedItem] = useState<any | null>(null);
+  const [scanning, setScanning] = useState(false);
 
-    useEffect(() => {
-        const next = cleanUSZip(initialZip || "");
-        setZip(next);
-    }, [initialZip]);
+  useEffect(() => {
+    const next = cleanUSZip(initialZip || "");
+    setZip(next);
+  }, [initialZip]);
 
-    useEffect(() => {
-        if (isUSZip(zip)) fetchItems(zip);
-        else setData(null);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [zip]);
+  useEffect(() => {
+    if (isUSZip(zip)) fetchItems(zip);
+    else setData(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [zip]);
 
-    async function fetchItems(z: string) {
-        setLoading(true);
-        setData(null);
-        try {
-            const res = await fetch(`/api/items?zip=${encodeURIComponent(z)}`, {
-                cache: "no-store",
-            });
-            const json = (await res.json()) as ApiResp;
-            setData(json);
+  async function fetchItems(z: string) {
+    setLoading(true);
+    setData(null);
+    try {
+      const res = await fetch(`/api/items?zip=${encodeURIComponent(z)}`, {
+        cache: "no-store",
+      });
+      const json = (await res.json()) as ApiResp;
+      setData(json);
 
-            const response = await fetch(`/api/zip/${z}`);
-
-            const data = await response.json();
-
-            setZipData(data);
-        } catch (e) {
-            console.error("Error fetching items:", e);
-            setData({ items: [], count: 0 });
-            setZipData(null);
-        } finally {
-            setLoading(false);
-        }
+      const response = await fetch(`/api/zip/${z}`);
+      const data = await response.json();
+      setZipData(data);
+    } catch (e) {
+      console.error("Error fetching items:", e);
+      setData({ items: [], count: 0 });
+      setZipData(null);
+    } finally {
+      setLoading(false);
     }
+  }
 
-    function finalizeRoute() {
-        const url = `${SIGNUP_URL}?src=dashboard_modal&zip=${encodeURIComponent(zip)}`;
-        gaEvent("buy_click", { zip, url });
-        window.location.href = url;
-    }
+  function finalizeRoute() {
+    const url = `${SIGNUP_URL}?src=dashboard_modal&zip=${encodeURIComponent(zip)}`;
+    gaEvent("buy_click", { zip, url });
+    window.location.href = url;
+  }
 
-    const router = useRouter();
+  const router = useRouter();
 
-    function getDealItem(item: any) {
-        setSelectedItem(item);
-        gaEvent("check_deal", {item});
-        setScanning(true);
-    }
+  function getDealItem(item: any) {
+    setSelectedItem(item);
+    gaEvent("check_deal", { item });
+    setScanning(true);
+  }
 
-    function openPurchaseOverlay() {
-        setScanning(false);
-        setOpen(true);
-    }
+  function openPurchaseOverlay() {
+    setScanning(false);
+    setOpen(true);
+  }
 
-    if (!isUSZip(zip) || !initialZip || !initialZip?.length) {
-        router.push("/");
-        return null;
-    }
+  if (!isUSZip(zip) || !initialZip || !initialZip?.length) {
+    router.push("/");
+    return null;
+  }
 
-    return (
-        <div className="relative min-h-dvh pb-20">
-            <section className="container py-6">
-                <h1 className="text-2xl font-bold">eMoney Deals</h1>
+  return (
+    <div className="relative min-h-dvh pb-20">
+      <section className="container py-6">
+        <h1 className="text-2xl font-bold">eMoney Deals</h1>
 
-                {!zip || !isUSZip(zip) ? (
-                    <div className="mt-4 card p-6">
-                        <h3 className="text-lg font-semibold">Enter your US ZIP to scan</h3>
-                        <div className="mt-4 flex gap-3 max-w-md">
-                            <input
-                                className="input"
-                                placeholder="e.g. 33101 or 33101-1234"
-                                value={zip}
-                                onChange={(e) => setZip(e.target.value)}
-                                onKeyDown={(e) => e.key === "Enter" && isUSZip(zip) && fetchItems(zip)}
-                            />
-                            <button className="btn btn-primary" onClick={() => isUSZip(zip) && fetchItems(zip)}>Go</button>
-                        </div>
-                        {zip && !isUSZip(zip) && <p className="mt-2 text-xs text-red-300">Enter a valid US ZIP.</p>}
-                    </div>
-                ) : null}
+        {!zip || !isUSZip(zip) ? (
+          <div className="mt-4 card p-6">
+            <h3 className="text-lg font-semibold">Enter your US ZIP to scan</h3>
+            <div className="mt-4 flex gap-3 max-w-md">
+              <input
+                className="input"
+                placeholder="e.g. 33101 or 33101-1234"
+                value={zip}
+                onChange={(e) => setZip(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && isUSZip(zip) && fetchItems(zip)}
+              />
+              <button className="btn btn-primary" onClick={() => isUSZip(zip) && fetchItems(zip)}>
+                Go
+              </button>
+            </div>
+            {zip && !isUSZip(zip) && <p className="mt-2 text-xs text-red-300">Enter a valid US ZIP.</p>}
+          </div>
+        ) : null}
 
-                {data?.count ? (
-                    <div className="mt-4 card p-4">
-                        <div className="text-sm">
-                            
-                            <span className="ml-2 text-white/70">Click one of the deals to unlock. ✅</span>
-                        </div>
-                    </div>
-                ) : null}
-            </section>
+        {data?.count ? (
+          <div className="mt-4 card p-4">
+            <div className="text-sm">
+              <span className="ml-2 text-white/70">Click one of the deals to unlock. ✅</span>
+            </div>
+          </div>
+        ) : null}
+      </section>
 
-            <section className="container mt-4">
-                {data === null ? (
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                        {Array.from({ length: 12 }).map((_, i) => <SkeletonCard key={i} />)}
-                    </div>
-                ) : (
-                    <div
-                        key={`grid-${zip}`}
-                        className="grid items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-                    >
-                        {data.items.map((it) => (
-                            <motion.div
-                                key={it.id}
-                                className="h-full"
-                                initial={{ opacity: 0, y: 8 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.25 }}
-                            >
-                                <ItemCard item={it} cities={zipData?.cities || []} onClick={() => getDealItem(it)} className="h-full" />
-                            </motion.div>
-                        ))}
-                    </div>
-                )}
-            </section>
+      <section className="container mt-4">
+        {data === null ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
+        ) : (
+          <div key={`grid-${zip}`} className="grid items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {data.items.map((it) => (
+              <motion.div
+                key={it.id}
+                className="h-full"
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.25 }}
+              >
+                <ItemCard item={it} cities={zipData?.cities || []} onClick={() => getDealItem(it)} className="h-full" />
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </section>
 
-            <AnimatePresence>
-                {loading && (
-                    <motion.div
-                        className="fixed inset-0 z-50 grid place-items-center bg-black/60 backdrop-blur"
-                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                    >
-                        <motion.div className="h-1 w-2/3 overflow-hidden rounded-full bg-white/10">
-                            <motion.div
-                                className="h-full w-1/3 bg-gradient-to-r from-brand-purple to-brand-magenta"
-                                initial={{ x: "-100%" }}
-                                animate={{ x: "300%" }}
-                                transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
-                            />
-                        </motion.div>
-                        <div className="mt-3 text-sm text-white/70">Scanning inventory near {zip}…</div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+      <AnimatePresence>
+        {loading && (
+          <motion.div
+            className="fixed inset-0 z-50 grid place-items-center bg-black/60 backdrop-blur"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div className="h-1 w-2/3 overflow-hidden rounded-full bg-white/10">
+              <motion.div
+                className="h-full w-1/3 bg-gradient-to-r from-brand-purple to-brand-magenta"
+                initial={{ x: "-100%" }}
+                animate={{ x: "300%" }}
+                transition={{ repeat: Infinity, duration: 1.2, ease: "easeInOut" }}
+              />
+            </motion.div>
+            <div className="mt-3 text-sm text-white/70">Scanning inventory near {zip}…</div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-            <Modal open={open} onClose={() => setOpen(false)}>
-                <div className="items-center justify-center text-center">
-                    <h3 className="text-xl font-bold">This Deal is in Stock Near You ✅</h3>
-                    <p className="text-sm text-white/70 mt-1">
-                        Unlock Access to The Clearance Software Everyone’s Using
-                    </p>
+      {/* === FIXED: balanced tags inside Modal === */}
+      <Modal open={open} onClose={() => setOpen(false)}>
+        <div className="items-center justify-center text-center">
+          <h3 className="text-xl font-bold">This Deal is in Stock Near You ✅</h3>
+          <p className="text-sm text-white/70 mt-1">Unlock Access to The Clearance Software Everyone’s Using</p>
 
-                
-                    <div className="mt-6">
-                        <div className="inline-flex items-center justify-center rounded-xl px-4 py-2 font-semibold transition bg-[color:var(--card)] border border-white/10" onClick={finalizeRoute}>
-                            <div className="w-[10px] h-[10px] rounded-full bg-green-400 animate-pulse"></div> &nbsp; Recent Member Wins👇
-                        </div>
+          <div className="mt-6">
+            <div
+              className="inline-flex items-center justify-center rounded-xl px-4 py-2 font-semibold transition bg-[color:var(--card)] border border-white/10"
+              onClick={finalizeRoute}
+            >
+              <div className="w-[10px] h-[10px] rounded-full bg-green-400 animate-pulse"></div>&nbsp; Recent Member Wins👇
+            </div>
+          </div>
 
-                    </div>
-
-                    <SuccessHeroSlider
-                        items={[
-                            { src: "/success/insaneclearance.jpg", caption: "UNLOCK EXCLUSIVE HIDDEN CLEARANCE DEALS" },
-                            
-                            
-                            { src: "/success/pokemoncar.jpg", caption: "UNLOCK TRADING CARD RELEASES" },
-                            { src: "/success/lego.jpg", caption: "UNLOCK HIGH DEMAND COLLECTIBLES TO RESELL" },
-                            { src: "/success/penny.jpg", caption: "UNLOCK PENNY CLEARANCE ITEMS" },
-                            { src: "/success/tools.jpg", caption: "UNLOCK RANDOM RESELLABLE ITEMS" },
-                            
-                            
-                            
-                        ]}
-                        height={300}
-                        autoplayMs={1200}
-                        className="mx-auto"
-                    />
-                </div>
-
-                <div className="mt-3 flex items-center justify-center">
-                  <motion.div
-                    initial={{ opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
-                  >
-                    <FomoBadge min={200} max={450} durationMs={15 * 60_000} />
-                  </motion.div>
-                </div>
-
-                {/* CTA */}
-                <div className="flex items-center justify-center">
-                  <div className="relative mt-4 w-full max-w-[360px]">
-                    {/* glow layer */}
-                    <p className="mt-4 text-sm text-white/80 text-center">
-                      Unlock the stores near you with this deal 🔓
-                    </p>
-                    
-                    <div className="flex items-center justify-center">
-                      <div className="relative mt-3 w-full max-w-[360px]">
-                        <div
-                          className="pointer-events-none absolute -inset-1 rounded-2xl bg-gradient-to-r from-fuchsia-500/40 via-purple-500/40 to-pink-500/40 blur-lg opacity-70"
-                          aria-hidden
-                        />
-                        <motion.button
-                          className="relative btn btn-primary w-full py-4! cursor-pointer hover:opacity-90 rounded-2xl"
-                          onClick={finalizeRoute}
-                          whileHover={{ scale: 1.03 }}
-                          whileTap={{ scale: 0.99 }}
-                          animate={{
-                            boxShadow: [
-                              "0 0 0px rgba(168,85,247,0.45)",
-                              "0 0 28px rgba(168,85,247,0.75)",
-                              "0 0 0px rgba(168,85,247,0.45)",
-                            ],
-                          }}
-                          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                        >
-                          Claim Now 🔓
-                        </motion.button>
-                      </div>
-                    </div>
-                </div>
-
-                <div className="absolute top-0 right-0 w-16 h-16 rounded-full bg-red-600 flex items-center justify-center text-white font-bold text-sm -translate-x-1/3 -translate-y-1/3 shadow-glow">
-                        <span className="text-center">LIMITED STOCK</span>
-                </div>
-            </Modal>
-
-            {scanning && <ScanOverlayPurchase item={selectedItem} cities={zipData?.cities || []} onDone={openPurchaseOverlay} />}
+          <SuccessHeroSlider
+            items={[
+              { src: "/success/insaneclearance.jpg", caption: "UNLOCK EXCLUSIVE HIDDEN CLEARANCE DEALS" },
+              { src: "/success/pokemoncar.jpg", caption: "UNLOCK TRADING CARD RELEASES" },
+              { src: "/success/lego.jpg", caption: "UNLOCK HIGH DEMAND COLLECTIBLES TO RESELL" },
+              { src: "/success/penny.jpg", caption: "UNLOCK PENNY CLEARANCE ITEMS" },
+              { src: "/success/tools.jpg", caption: "UNLOCK RANDOM RESELLABLE ITEMS" },
+            ]}
+            height={300}
+            autoplayMs={1200}
+            className="mx-auto"
+          />
         </div>
-    );
+
+        <div className="mt-3 flex items-center justify-center">
+          <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}>
+            <FomoBadge min={200} max={450} durationMs={15 * 60_000} />
+          </motion.div>
+        </div>
+
+        {/* CTA */}
+        <div className="flex items-center justify-center">
+          <div className="relative mt-4 w-full max-w-[360px]">
+            <p className="mt-4 text-sm text-white/80 text-center">Unlock the stores near you with this deal 🔓</p>
+
+            <div className="flex items-center justify-center">
+              <div className="relative mt-3 w-full max-w-[360px]">
+                {/* outer glow */}
+                <div
+                  className="pointer-events-none absolute -inset-1 rounded-2xl bg-gradient-to-r from-fuchsia-500/40 via-purple-500/40 to-pink-500/40 blur-lg opacity-70"
+                  aria-hidden
+                />
+                {/* inner pulsing glow */}
+                <motion.div
+                  className="pointer-events-none absolute -inset-[2px] rounded-2xl bg-gradient-to-r from-fuchsia-500/20 via-purple-500/20 to-pink-500/20 blur-md"
+                  aria-hidden
+                  animate={{ opacity: [0.35, 0.7, 0.35] }}
+                  transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <motion.button
+                  className="relative btn btn-primary w-full rounded-2xl py-4 cursor-pointer hover:opacity-90"
+                  onClick={finalizeRoute}
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{
+                    opacity: 1,
+                    scale: 1,
+                    boxShadow: [
+                      "0 0 0px rgba(168,85,247,0.45)",
+                      "0 0 28px rgba(168,85,247,0.75)",
+                      "0 0 0px rgba(168,85,247,0.45)",
+                    ],
+                  }}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.99 }}
+                  transition={{ duration: 0.4, boxShadow: { duration: 2, repeat: Infinity, ease: "easeInOut" } }}
+                >
+                  Claim Now 🔓
+                </motion.button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* fixed badge stays inside Modal, after closing CTA container */}
+        <div className="absolute top-0 right-0 w-16 h-16 -translate-x-1/3 -translate-y-1/3 rounded-full bg-red-600 flex items-center justify-center text-white font-bold text-sm shadow-glow">
+          <span className="text-center">LIMITED STOCK</span>
+        </div>
+      </Modal>
+
+      {scanning && (
+        <ScanOverlayPurchase item={selectedItem} cities={zipData?.cities || []} onDone={openPurchaseOverlay} />
+      )}
+    </div>
+  );
 }
 
 function FomoBadge({
-    min = 200,
-    max = 400,
-    durationMs = 15 * 60_000,
-    autoReset = false,
-    onExpire,
-    label = "new users unlocked their stores in the last hour",
+  min = 200,
+  max = 400,
+  durationMs = 15 * 60_000,
+  autoReset = false,
+  onExpire,
+  label = "new users unlocked their stores in the last hour",
 }: FomoProps) {
-    const randInt = (a: number, b: number) => a + Math.floor(Math.random() * (b - a + 1));
-    const [count] = useState(() => randInt(min, max));
-    const endTs = useRef<number>(Date.now() + durationMs);
-    const [remaining, setRemaining] = useState<number>(durationMs);
+  const randInt = (a: number, b: number) => a + Math.floor(Math.random() * (b - a + 1));
+  const [count] = useState(() => randInt(min, max));
+  const endTs = useRef<number>(Date.now() + durationMs);
+  const [remaining, setRemaining] = useState<number>(durationMs);
 
-    // keep min/max valid
-    const safeCount = useMemo(
-        () => Math.min(Math.max(count, Math.min(min, max)), Math.max(min, max)),
-        [count, min, max]
-    );
+  const safeCount = useMemo(
+    () => Math.min(Math.max(count, Math.min(min, max)), Math.max(min, max)),
+    [count, min, max]
+  );
 
-    useEffect(() => {
-        // reset endTs when duration changes
-        endTs.current = Date.now() + durationMs;
-        setRemaining(durationMs);
+  useEffect(() => {
+    endTs.current = Date.now() + durationMs;
+    setRemaining(durationMs);
 
-        const id = window.setInterval(() => {
-            const left = Math.max(0, endTs.current - Date.now());
-            setRemaining(left);
+    const id = window.setInterval(() => {
+      const left = Math.max(0, endTs.current - Date.now());
+      setRemaining(left);
 
-            if (left === 0) {
-                onExpire?.();
-                if (autoReset) {
-                    endTs.current = Date.now() + durationMs;
-                    setRemaining(durationMs);
-                } else {
-                    window.clearInterval(id);
-                }
-            }
-        }, 1000);
+      if (left === 0) {
+        onExpire?.();
+        if (autoReset) {
+          endTs.current = Date.now() + durationMs;
+          setRemaining(durationMs);
+        } else {
+          window.clearInterval(id);
+        }
+      }
+    }, 1000);
 
-        return () => window.clearInterval(id);
-    }, [durationMs, autoReset, onExpire]);
+    return () => window.clearInterval(id);
+  }, [durationMs, autoReset, onExpire]);
 
-    const mm = String(Math.floor(remaining / 60_000)).padStart(2, "0");
-    const ss = String(Math.floor((remaining % 60_000) / 1000)).padStart(2, "0");
-    const urgent = remaining <= 60_000; // last minute → subtle pulse
+  const mm = String(Math.floor(remaining / 60_000)).padStart(2, "0");
+  const ss = String(Math.floor((remaining % 60_000) / 1000)).padStart(2, "0");
+  const urgent = remaining <= 60_000;
 
-    return (
-        <span
-            className={[
-                "inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5",
-                "px-3 py-1 text-xs font-semibold text-white/80",
-                urgent ? "ring-1 ring-red-500/20 animate-[pulse_1.6s_ease-in-out_infinite]" : "",
-            ].join(" ")}
-            aria-live="polite"
-            title={`Offer window ends in ${mm}:${ss}`}
-        >
-            <span className="text-base leading-none">🔥</span>
-            <span>
-                <strong className="text-white">{safeCount}</strong> {label}
-            </span>
-            <span className="inline-flex items-center gap-1 text-white/70">
-                • <span className="tabular-nums">{mm}:{ss}</span>
-            </span>
-        </span>
-    );
+  return (
+    <span
+      className={[
+        "inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5",
+        "px-3 py-1 text-xs font-semibold text-white/80",
+        urgent ? "ring-1 ring-red-500/20 animate-[pulse_1.6s_ease-in-out_infinite]" : "",
+      ].join(" ")}
+      aria-live="polite"
+      title={`Offer window ends in ${mm}:${ss}`}
+    >
+      <span className="text-base leading-none">🔥</span>
+      <span>
+        <strong className="text-white">{safeCount}</strong> {label}
+      </span>
+      <span className="inline-flex items-center gap-1 text-white/70">• <span className="tabular-nums">{mm}:{ss}</span></span>
+    </span>
+  );
 }
