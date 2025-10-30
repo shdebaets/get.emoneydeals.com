@@ -35,10 +35,21 @@ type FomoProps = {
   label?: string;
 };
 
+// NEW: stages for flow
+type Stage = "demo" | "loading" | "results";
+
 export default function Dashboard() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+
   const initialZip = searchParams.get("zip");
   const [zip, setZip] = useState(cleanUSZip(initialZip || ""));
+  const [stage, setStage] = useState<Stage>("demo"); // start at demo once we have a valid zip
+
+  const [email, setEmail] = useState("");
+  const [emailErr, setEmailErr] = useState<string | null>(null);
+  const [emailSubmitting, setEmailSubmitting] = useState(false);
+
   const [data, setData] = useState<ApiResp | null>(null);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -46,36 +57,57 @@ export default function Dashboard() {
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [scanning, setScanning] = useState(false);
 
+  // keep local zip in sync with URL
   useEffect(() => {
     const next = cleanUSZip(initialZip || "");
     setZip(next);
   }, [initialZip]);
 
+  // if no valid zip in URL, send them back home to enter it
   useEffect(() => {
-    if (isUSZip(zip)) fetchItems(zip);
-    else setData(null);
+    if (!isUSZip(zip) || !initialZip || !initialZip?.length) {
+      router.push("/");
+    } else {
+      // reflect "demo screen" state in the URL for clarity
+      const qp = new URLSearchParams(searchParams.toString());
+      qp.set("demo", "1");
+      router.replace(`?${qp.toString()}`);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [zip]);
+
+  // Fetch only when stage moves to "loading"
+  useEffect(() => {
+    if (stage === "loading" && isUSZip(zip)) {
+      void fetchItems(zip);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stage, zip]);
 
   async function fetchItems(z: string) {
     setLoading(true);
     setData(null);
     try {
-      const res = await fetch(`/api/items?zip=${encodeURIComponent(z)}`, {
-        cache: "no-store",
-      });
+      const res = await fetch(`/api/items?zip=${encodeURIComponent(z)}`, { cache: "no-store" });
       const json = (await res.json()) as ApiResp;
       setData(json);
 
       const response = await fetch(`/api/zip/${z}`);
-      const data = await response.json();
-      setZipData(data);
+      const zjson = (await response.json()) as ZipData;
+      setZipData(zjson);
+
+      setStage("results");
     } catch (e) {
       console.error("Error fetching items:", e);
       setData({ items: [], count: 0 });
       setZipData(null);
+      setStage("results");
     } finally {
       setLoading(false);
+      // clean demo flag from URL when leaving demo
+      const qp = new URLSearchParams(searchParams.toString());
+      qp.delete("demo");
+      router.replace(`?${qp.toString()}`);
     }
   }
 
@@ -84,8 +116,6 @@ export default function Dashboard() {
     gaEvent("buy_click", { zip, url });
     window.location.href = url;
   }
-
-  const router = useRouter();
 
   function getDealItem(item: any) {
     setSelectedItem(item);
@@ -98,36 +128,112 @@ export default function Dashboard() {
     setOpen(true);
   }
 
-  if (!isUSZip(zip) || !initialZip || !initialZip?.length) {
-    router.push("/");
-    return null;
+  function isValidEmail(v: string) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
   }
 
+  async function submitDemo(e: React.FormEvent) {
+    e.preventDefault();
+    setEmailErr(null);
+
+    if (!isValidEmail(email)) {
+      setEmailErr("Enter a valid email address.");
+      return;
+    }
+
+    try {
+      setEmailSubmitting(true);
+      // optional: record the demo lead — safe to no-op if you don’t have this route
+      await fetch("/api/lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: "",
+          email,
+          phone: "",
+          source: "demo_mode",
+          zip,
+        }),
+      }).catch(() => { /* ignore errors here */ });
+
+      gaEvent("demo_start", { zip, email });
+      setStage("loading"); // this triggers fetchItems via effect
+    } catch (err) {
+      console.error(err);
+      setEmailErr("Could not start demo. Please try again.");
+    } finally {
+      setEmailSubmitting(false);
+    }
+  }
+
+  // While we’re in demo stage, render the Demo Screen
+  if (stage === "demo" && isUSZip(zip)) {
+    return (
+      <div className="relative min-h-dvh pb-20">
+        <section className="container max-w-[680px] mx-auto py-10">
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35 }}
+            className="card p-8 text-center"
+          >
+            <h1 className="text-3xl font-extrabold tracking-tight">Try Demo Mode</h1>
+            <p className="mt-2 text-white/75">
+              Preview the Clearance Software for <span className="font-semibold">ZIP {zip}</span>. No card required to try the demo.
+            </p>
+
+            <form onSubmit={submitDemo} className="mx-auto mt-6 grid gap-3 max-w-md">
+              <div className="text-left">
+                <label className="text-xs font-semibold text-white/70">Email</label>
+                <input
+                  className="input mt-1 w-full"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  aria-invalid={!!emailErr}
+                  aria-describedby="email-err"
+                />
+                {emailErr ? (
+                  <p id="email-err" className="mt-1 text-xs text-red-300">
+                    {emailErr}
+                  </p>
+                ) : null}
+              </div>
+
+              {/* We show the submitted ZIP read-only to match your request “email textbox below where they submitted their zipcode” */}
+              <div className="text-left">
+                <label className="text-xs font-semibold text-white/70">ZIP Code</label>
+                <input className="input mt-1 w-full opacity-70" value={zip} readOnly />
+                <p className="mt-1 text-[11px] text-white/50">Scanning stores near this ZIP in demo.</p>
+              </div>
+
+              <motion.button
+                type="submit"
+                disabled={emailSubmitting}
+                className="btn btn-primary mt-2"
+                whileTap={{ scale: 0.98 }}
+              >
+                {emailSubmitting ? "Starting Demo…" : "Start Demo"}
+              </motion.button>
+
+              <p className="mt-2 text-xs text-white/60">
+                By starting demo, you agree to receive onboarding tips. You can opt out anytime.
+              </p>
+            </form>
+          </motion.div>
+        </section>
+      </div>
+    );
+  }
+
+  // From here on, your original page (loading/results/modal) remains
   return (
     <div className="relative min-h-dvh pb-20">
       <section className="container py-6">
         <h1 className="text-2xl font-bold">eMoney Deals</h1>
 
-        {!zip || !isUSZip(zip) ? (
-          <div className="mt-4 card p-6">
-            <h3 className="text-lg font-semibold">Enter your US ZIP to scan</h3>
-            <div className="mt-4 flex gap-3 max-w-md">
-              <input
-                className="input"
-                placeholder="e.g. 33101 or 33101-1234"
-                value={zip}
-                onChange={(e) => setZip(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && isUSZip(zip) && fetchItems(zip)}
-              />
-              <button className="btn btn-primary" onClick={() => isUSZip(zip) && fetchItems(zip)}>
-                Go
-              </button>
-            </div>
-            {zip && !isUSZip(zip) && <p className="mt-2 text-xs text-red-300">Enter a valid US ZIP.</p>}
-          </div>
-        ) : null}
-
-        {data?.count ? (
+        {stage === "results" && data?.count ? (
           <div className="mt-4 card p-4">
             <div className="text-sm">
               <span className="ml-2 text-white/70">Click one of the deals to unlock. ✅</span>
@@ -137,7 +243,7 @@ export default function Dashboard() {
       </section>
 
       <section className="container mt-4">
-        {data === null ? (
+        {stage !== "results" || data === null ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {Array.from({ length: 12 }).map((_, i) => (
               <SkeletonCard key={i} />
@@ -181,7 +287,6 @@ export default function Dashboard() {
         )}
       </AnimatePresence>
 
-      {/* === FIXED: balanced tags inside Modal === */}
       <Modal open={open} onClose={() => setOpen(false)}>
         <div className="items-center justify-center text-center">
           <h3 className="text-xl font-bold">This Deal is in Stock Near You ✅</h3>
@@ -216,18 +321,14 @@ export default function Dashboard() {
           </motion.div>
         </div>
 
-        {/* CTA */}
-     
         <div className="flex items-center justify-center mt-2">
           <div className="relative w-full max-w-[360px]">
             <div className="flex items-center justify-center">
               <div className="relative mt-2 w-full max-w-[360px]">
-                {/* outer glow */}
                 <div
                   className="pointer-events-none absolute -inset-1 rounded-2xl bg-gradient-to-r from-fuchsia-500/40 via-purple-500/40 to-pink-500/40 blur-lg opacity-70"
                   aria-hidden
                 />
-                {/* inner pulsing glow */}
                 <motion.div
                   className="pointer-events-none absolute -inset-[2px] rounded-2xl bg-gradient-to-r from-fuchsia-500/20 via-purple-500/20 to-pink-500/20 blur-md"
                   aria-hidden
@@ -259,7 +360,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* fixed badge stays inside Modal, after closing CTA container */}
         <div className="absolute top-0 right-0 w-16 h-16 -translate-x-1/3 -translate-y-1/3 rounded-full bg-red-600 flex items-center justify-center text-white font-bold text-sm shadow-glow">
           <span className="text-center">LIMITED STOCK</span>
         </div>
