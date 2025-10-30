@@ -288,149 +288,122 @@ export default function Dashboard() {
       </AnimatePresence>
 
       <Modal open={open} onClose={() => setOpen(false)}>
-        <div className="items-center justify-center text-center">
-          <h3 className="text-xl font-bold">This Deal is in Stock Near You ✅</h3>
-          <p className="text-sm text-white/70 mt-1">Unlock Access to The Clearance Software Everyone’s Using</p>
+                <div className="items-center justify-center text-center">
+                    <h3 className="text-xl font-bold">WAIT! 🛑</h3>
+                    <p className="text-sm text-white/70 mt-1">
+                        To Unlock Your Deal & Free Access to eMoney Click Below ✅
+                    </p>
 
-          <div className="mt-6">
-            <div
-              className="inline-flex items-center justify-center rounded-xl px-4 py-2 font-semibold transition bg-[color:var(--card)] border border-white/10"
-              onClick={finalizeRoute}
-            >
-              <div className="w-[10px] h-[10px] rounded-full bg-green-400 animate-pulse"></div>&nbsp; Recent Member Wins
-            </div>
-          </div>
+                
+                    <div className="mt-6">
+                        <div className="inline-flex items-center justify-center rounded-xl px-4 py-2 font-semibold transition bg-[color:var(--card)] border border-white/10" onClick={finalizeRoute}>
+                            <div className="w-[10px] h-[10px] rounded-full bg-green-400 animate-pulse"></div> &nbsp; Get Full Access To Everything Below FOR FREE 🔓
+                        </div>
 
-          <SuccessHeroSlider
-            items={[
-              { src: "/success/insaneclearance.jpg", caption: "UNLOCK EXCLUSIVE HIDDEN CLEARANCE DEALS" },
-              { src: "/success/pokemoncar.jpg", caption: "UNLOCK TRADING CARD RELEASES" },
-              { src: "/success/lego.jpg", caption: "UNLOCK HIGH DEMAND COLLECTIBLES TO RESELL" },
-              { src: "/success/penny.jpg", caption: "UNLOCK PENNY CLEARANCE ITEMS" },
-              { src: "/success/tools.jpg", caption: "UNLOCK RANDOM RESELLABLE ITEMS" },
-            ]}
-            height={300}
-            autoplayMs={1200}
-            className="mx-auto"
-          />
+                    </div>
+
+                    <SuccessHeroSlider
+                        items={[
+                            { src: "/success/insaneclearance.jpg", caption: "UNLOCK EXCLUSIVE HIDDEN CLEARANCE DEALS" },
+                            
+                            
+                            { src: "/success/pokemoncar.jpg", caption: "UNLOCK TRADING CARD RELEASES" },
+                            { src: "/success/lego.jpg", caption: "UNLOCK HIGH DEMAND COLLECTIBLES TO RESELL" },
+                            { src: "/success/penny.jpg", caption: "UNLOCK PENNY CLEARANCE ITEMS" },
+                            { src: "/success/tools.jpg", caption: "UNLOCK RANDOM RESELLABLE ITEMS" },
+                            
+                            
+                            
+                        ]}
+                        height={300}
+                        autoplayMs={1200}
+                        className="mx-auto"
+                    />
+                </div>
+
+                <div className="mt-3 flex items-center justify-center">
+                    <FomoBadge min={200} max={450} durationMs={15 * 60_000} />
+                </div>
+
+                <div className="flex items-center justify-center">
+                    <button className="btn btn-primary mt-4 py-4! cursor-pointer hover:opacity-80 transition-all duration-200" onClick={finalizeRoute}>
+                        GET ACCESS FOR FREE 🔓
+                    </button>
+                </div>
+
+                <div className="absolute top-0 right-0 w-16 h-16 rounded-full bg-red-600 flex items-center justify-center text-white font-bold text-sm -translate-x-1/3 -translate-y-1/3 shadow-glow">
+                        <span className="text-center">FREE TRIAL</span>
+                </div>
+            </Modal>
+
+            {scanning && <ScanOverlayPurchase item={selectedItem} cities={zipData?.cities || []} onDone={openPurchaseOverlay} />}
         </div>
-
-        <div className="mt-3 flex items-center justify-center">
-          <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}>
-            <FomoBadge min={200} max={450} durationMs={15 * 60_000} />
-          </motion.div>
-        </div>
-
-        <div className="flex items-center justify-center mt-2">
-          <div className="relative w-full max-w-[360px]">
-            <div className="flex items-center justify-center">
-              <div className="relative mt-2 w-full max-w-[360px]">
-                <div
-                  className="pointer-events-none absolute -inset-1 rounded-2xl bg-gradient-to-r from-fuchsia-500/40 via-purple-500/40 to-pink-500/40 blur-lg opacity-70"
-                  aria-hidden
-                />
-                <motion.div
-                  className="pointer-events-none absolute -inset-[2px] rounded-2xl bg-gradient-to-r from-fuchsia-500/20 via-purple-500/20 to-pink-500/20 blur-md"
-                  aria-hidden
-                  animate={{ opacity: [0.35, 0.7, 0.35] }}
-                  transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
-                />
-                <motion.button
-                  className="relative btn btn-primary w-full rounded-2xl py-4 cursor-pointer hover:opacity-90 flex flex-col items-center justify-center"
-                  onClick={finalizeRoute}
-                  initial={{ opacity: 0, scale: 0.98 }}
-                  animate={{
-                    opacity: 1,
-                    scale: 1,
-                    boxShadow: [
-                      "0 0 0px rgba(168,85,247,0.45)",
-                      "0 0 28px rgba(168,85,247,0.75)",
-                      "0 0 0px rgba(168,85,247,0.45)",
-                    ],
-                  }}
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.99 }}
-                  transition={{ duration: 0.4, boxShadow: { duration: 2, repeat: Infinity, ease: "easeInOut" } }}
-                >
-                  <span className="text-lg font-semibold">🚨 Claim Now 🚨</span>
-                  <span className="text-xs text-white/80 mt-1">Unlock the stores near you with this deal</span>
-                </motion.button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="absolute top-0 right-0 w-16 h-16 -translate-x-1/3 -translate-y-1/3 rounded-full bg-red-600 flex items-center justify-center text-white font-bold text-sm shadow-glow">
-          <span className="text-center">LIMITED STOCK</span>
-        </div>
-      </Modal>
-
-      {scanning && (
-        <ScanOverlayPurchase item={selectedItem} cities={zipData?.cities || []} onDone={openPurchaseOverlay} />
-      )}
-    </div>
-  );
+    );
 }
 
 function FomoBadge({
-  min = 200,
-  max = 400,
-  durationMs = 15 * 60_000,
-  autoReset = false,
-  onExpire,
-  label = "new users unlocked their stores in the last hour",
+    min = 200,
+    max = 400,
+    durationMs = 15 * 60_000,
+    autoReset = false,
+    onExpire,
+    label = "claimed in the last hour",
 }: FomoProps) {
-  const randInt = (a: number, b: number) => a + Math.floor(Math.random() * (b - a + 1));
-  const [count] = useState(() => randInt(min, max));
-  const endTs = useRef<number>(Date.now() + durationMs);
-  const [remaining, setRemaining] = useState<number>(durationMs);
+    const randInt = (a: number, b: number) => a + Math.floor(Math.random() * (b - a + 1));
+    const [count] = useState(() => randInt(min, max));
+    const endTs = useRef<number>(Date.now() + durationMs);
+    const [remaining, setRemaining] = useState<number>(durationMs);
 
-  const safeCount = useMemo(
-    () => Math.min(Math.max(count, Math.min(min, max)), Math.max(min, max)),
-    [count, min, max]
-  );
+    // keep min/max valid
+    const safeCount = useMemo(
+        () => Math.min(Math.max(count, Math.min(min, max)), Math.max(min, max)),
+        [count, min, max]
+    );
 
-  useEffect(() => {
-    endTs.current = Date.now() + durationMs;
-    setRemaining(durationMs);
+    useEffect(() => {
+        // reset endTs when duration changes
+        endTs.current = Date.now() + durationMs;
+        setRemaining(durationMs);
 
-    const id = window.setInterval(() => {
-      const left = Math.max(0, endTs.current - Date.now());
-      setRemaining(left);
+        const id = window.setInterval(() => {
+            const left = Math.max(0, endTs.current - Date.now());
+            setRemaining(left);
 
-      if (left === 0) {
-        onExpire?.();
-        if (autoReset) {
-          endTs.current = Date.now() + durationMs;
-          setRemaining(durationMs);
-        } else {
-          window.clearInterval(id);
-        }
-      }
-    }, 1000);
+            if (left === 0) {
+                onExpire?.();
+                if (autoReset) {
+                    endTs.current = Date.now() + durationMs;
+                    setRemaining(durationMs);
+                } else {
+                    window.clearInterval(id);
+                }
+            }
+        }, 1000);
 
-    return () => window.clearInterval(id);
-  }, [durationMs, autoReset, onExpire]);
+        return () => window.clearInterval(id);
+    }, [durationMs, autoReset, onExpire]);
 
-  const mm = String(Math.floor(remaining / 60_000)).padStart(2, "0");
-  const ss = String(Math.floor((remaining % 60_000) / 1000)).padStart(2, "0");
-  const urgent = remaining <= 60_000;
+    const mm = String(Math.floor(remaining / 60_000)).padStart(2, "0");
+    const ss = String(Math.floor((remaining % 60_000) / 1000)).padStart(2, "0");
+    const urgent = remaining <= 60_000; // last minute → subtle pulse
 
-  return (
-    <span
-      className={[
-        "inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5",
-        "px-3 py-1 text-xs font-semibold text-white/80",
-        urgent ? "ring-1 ring-red-500/20 animate-[pulse_1.6s_ease-in-out_infinite]" : "",
-      ].join(" ")}
-      aria-live="polite"
-      title={`Offer window ends in ${mm}:${ss}`}
-    >
-      <span className="text-base leading-none">🔥</span>
-      <span>
-        <strong className="text-white">{safeCount}</strong> {label}
-      </span>
-      <span className="inline-flex items-center gap-1 text-white/70">• <span className="tabular-nums">{mm}:{ss}</span></span>
-    </span>
-  );
+    return (
+        <span
+            className={[
+                "inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5",
+                "px-3 py-1 text-xs font-semibold text-white/80",
+                urgent ? "ring-1 ring-red-500/20 animate-[pulse_1.6s_ease-in-out_infinite]" : "",
+            ].join(" ")}
+            aria-live="polite"
+            title={`Offer window ends in ${mm}:${ss}`}
+        >
+            <span className="text-base leading-none">🔥</span>
+            <span>
+                <strong className="text-white">{safeCount}</strong> {label}
+            </span>
+            <span className="inline-flex items-center gap-1 text-white/70">
+                • <span className="tabular-nums">{mm}:{ss}</span>
+            </span>
+        </span>
+    );
 }
