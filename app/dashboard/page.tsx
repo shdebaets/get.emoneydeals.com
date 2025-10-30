@@ -192,7 +192,7 @@ export default function Dashboard() {
               className="inline-flex items-center justify-center rounded-xl px-4 py-2 font-semibold transition bg-[color:var(--card)] border border-white/10"
               onClick={finalizeRoute}
             >
-              <div className="w-[10px] h-[10px] rounded-full bg-green-400 animate-pulse"></div>&nbsp; Recent Member Wins👇
+              <div className="w-[10px] h-[10px] rounded-full bg-green-400 animate-pulse"></div>&nbsp; Recent Member Wins
             </div>
           </div>
 
@@ -219,7 +219,7 @@ export default function Dashboard() {
         {/* CTA */}
         <div className="flex items-center justify-center">
           <div className="relative mt-4 w-full max-w-[360px]">
-            <p className="mt-4 text-sm text-white/80 text-center">Unlock the stores near you with this deal 🔓</p>
+            <p className="mt-4 text-sm text-white/80 text-center">👇Unlock the stores near you with this deal👇</p>
 
             <div className="flex items-center justify-center">
               <div className="relative mt-3 w-full max-w-[360px]">
@@ -252,7 +252,7 @@ export default function Dashboard() {
                   whileTap={{ scale: 0.99 }}
                   transition={{ duration: 0.4, boxShadow: { duration: 2, repeat: Infinity, ease: "easeInOut" } }}
                 >
-                  Claim Now 🔓
+                  🚨 Claim Now 🚨
                 </motion.button>
               </div>
             </div>
