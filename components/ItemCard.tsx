@@ -18,6 +18,27 @@ type SafeItem = {
     upc: string | null;
 };
 
+async function trackEvent(event: string) {
+    try {
+        await fetch("https://emoneydeals.com/api/web-event", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                url: window.location.href,
+                event,
+            }),
+        });
+    } catch (error) {
+        console.error("Failed to track event:", error);
+    }
+}
+
+function getEventNameForItem(item: SafeItem): string {
+    // Create a normalized version of the brand name for the event
+    const brandNormalized = item.brand.toLowerCase().replace(/[^a-z0-9]/g, "_");
+    return `get_deal_${brandNormalized}_button_click`;
+}
+
 export default function ItemCard({
     item,
     cities,
@@ -29,9 +50,18 @@ export default function ItemCard({
     onClick: () => void;
     className?: string;
 }) {
+    const handleGetDealClick = (e: React.MouseEvent) => {
+        // Track the event
+        const eventName = getEventNameForItem(item);
+        trackEvent(eventName);
+
+        // Call the original onClick handler
+        onClick();
+    };
+
     return (
         <button
-            onClick={onClick}
+            onClick={handleGetDealClick}
             className={clsx(
                 "group relative w-full rounded-2xl border border-white/10 bg-[#0D0C14]/80 p-3 text-left",
                 "shadow-[0_8px_28px_rgba(0,0,0,.35)] transition hover:translate-y-[-2px] hover:shadow-glow",
@@ -82,7 +112,7 @@ export default function ItemCard({
                 <div className="flex flex-col items-start min-w-0 gap-2 whitespace-nowrap">
                     <Chip>{item.retailer}</Chip>
                     <CityMarqueeChip cities={cities} seedKey={item.id} />
-                    <span className="text-[11px] text-white/85 overflow-hidden text-ellipsis">✅ {item.stock_hint.split("-")[0]} Found</span> 
+                    <span className="text-[11px] text-white/85 overflow-hidden text-ellipsis">✅ {item.stock_hint.split("-")[0]} Found</span>
                 </div>
             </div>
 
