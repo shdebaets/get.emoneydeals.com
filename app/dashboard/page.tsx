@@ -251,7 +251,7 @@ export default function Dashboard() {
                   whileTap={{ scale: 0.99 }}
                   transition={{ duration: 0.4, boxShadow: { duration: 2, repeat: Infinity, ease: "easeInOut" } }}
                 >
-                  <span className="text-lg font-semibold">👑 Claim Now 👑</span>
+                  <span className="text-lg font-semibold">🚨 Claim Now 🚨</span>
                   <span className="text-xs text-white/80 mt-1">Unlock the stores near you with this deal</span>
                 </motion.button>
               </div>
