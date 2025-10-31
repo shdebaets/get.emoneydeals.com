@@ -14,34 +14,40 @@ export async function POST(req: NextRequest) {
     const webhookUrl = process.env.WEBHOOK_URL;
 
     if (!webhookUrl) {
-      console.error("WEBHOOK_URL environment variable is not set");
+      console.error("❌ WEBHOOK_URL environment variable is not set");
       // Still return success to the client, but log the error
       return NextResponse.json({ success: true, message: "Lead received (webhook not configured)" });
     }
 
     // Send webhook with user email
+    console.log(`📤 Sending webhook to ${webhookUrl} for email: ${email}`);
     try {
+      const webhookPayload = {
+        email,
+        zip: zip || null,
+        name: name || null,
+        phone: phone || null,
+        source: source || null,
+        timestamp: new Date().toISOString(),
+      };
+
       const webhookResponse = await fetch(webhookUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          email,
-          zip: zip || null,
-          name: name || null,
-          phone: phone || null,
-          source: source || null,
-          timestamp: new Date().toISOString(),
-        }),
+        body: JSON.stringify(webhookPayload),
       });
 
-      if (!webhookResponse.ok) {
-        console.error(`Webhook failed with status ${webhookResponse.status}`);
-        // Still return success to the client, but log the error
+      if (webhookResponse.ok) {
+        console.log(`✅ Webhook sent successfully (status: ${webhookResponse.status})`);
+      } else {
+        console.error(`❌ Webhook failed with status ${webhookResponse.status}`);
+        const errorText = await webhookResponse.text().catch(() => "Could not read error");
+        console.error(`Error response: ${errorText}`);
       }
     } catch (webhookError) {
-      console.error("Error sending webhook:", webhookError);
+      console.error("❌ Error sending webhook:", webhookError);
       // Still return success to the client, but log the error
     }
 
