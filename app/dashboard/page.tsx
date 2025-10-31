@@ -179,7 +179,7 @@ export default function Dashboard() {
           >
             <h1 className="text-3xl font-extrabold tracking-tight">Try Demo Mode</h1>
             <p className="mt-2 text-white/75">
-              Preview the Clearance Software for <span className="font-semibold">ZIP {zip}</span>. No card required to try the demo.
+             A private invite to our <span className="font-semibold">100% free telegram</span> deal group will be emailed to you (so check your email)
             </p>
 
             <form onSubmit={submitDemo} className="mx-auto mt-6 grid gap-3 max-w-md">
@@ -218,7 +218,8 @@ export default function Dashboard() {
               </motion.button>
 
               <p className="mt-2 text-xs text-white/60">
-                A private invite to our 100% free telegram deal group will be emailed to you
+                Preview the Clearance Software for <span className="font-semibold">ZIP {zip}</span>. 
+                
               </p>
             </form>
           </motion.div>
